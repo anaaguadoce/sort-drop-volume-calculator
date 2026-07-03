@@ -3,653 +3,460 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Universal Drop Volume Calculator for Cell Sorters</title>
+  <title>Universal Drop Volume Calculator</title>
   <style>
     :root {
-      --bg: #eef6f7;
-      --panel: #ffffff;
-      --ink: #14213d;
-      --muted: #5f6b7a;
-      --accent: #2a9d8f;
-      --accent-2: #e76f51;
-      --line: #d9e3e7;
-      --soft: #f7fbfc;
-      --warning: #fff4df;
-      --warning-line: #f3c56b;
-      --error: #fff0f0;
-      --error-line: #e56b6f;
-      --shadow: 0 18px 45px rgba(20, 33, 61, 0.12);
+      --bg: #eef5f8;
+      --card: #ffffff;
+      --ink: #1f2933;
+      --muted: #64748b;
+      --line: #d8e2ea;
+      --accent: #256d85;
+      --accent-dark: #164e63;
+      --soft: #e6f2f6;
+      --warning: #8a4b08;
+      --warning-bg: #fff7e6;
+      --shadow: 0 18px 45px rgba(31, 41, 51, 0.12);
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--ink);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
-        radial-gradient(circle at 10% 10%, rgba(42, 157, 143, 0.20), transparent 28%),
-        radial-gradient(circle at 90% 5%, rgba(231, 111, 81, 0.14), transparent 26%),
-        linear-gradient(135deg, #eef6f7 0%, #f8fbfd 55%, #f4f0ff 100%);
+        radial-gradient(circle at top left, #d9edf3 0, transparent 34rem),
+        linear-gradient(135deg, #f7fbfd, var(--bg));
+      color: var(--ink);
       min-height: 100vh;
-      padding: 28px;
     }
 
-    .wrap {
-      max-width: 1100px;
+    .page {
+      width: min(1120px, calc(100% - 32px));
       margin: 0 auto;
+      padding: 42px 0 28px;
     }
 
     header {
-      display: grid;
-      gap: 10px;
-      margin-bottom: 24px;
+      margin-bottom: 26px;
     }
 
     .eyebrow {
-      display: inline-flex;
-      width: fit-content;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(42, 157, 143, 0.12);
-      color: #11665c;
+      color: var(--accent-dark);
       font-weight: 700;
-      font-size: 0.82rem;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.76rem;
+      margin: 0 0 10px;
     }
 
     h1 {
-      margin: 0;
-      font-size: clamp(2rem, 5vw, 4.5rem);
-      line-height: 0.95;
-      letter-spacing: -0.06em;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1;
+      margin: 0 0 14px;
+      letter-spacing: -0.05em;
     }
 
-    .lead {
-      max-width: 780px;
-      margin: 0;
+    .subtitle {
+      max-width: 760px;
       color: var(--muted);
-      font-size: 1.08rem;
-      line-height: 1.6;
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      line-height: 1.55;
+      margin: 0;
     }
 
     main {
       display: grid;
-      grid-template-columns: minmax(280px, 0.95fr) minmax(300px, 1.05fr);
+      grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
       gap: 22px;
       align-items: start;
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.88);
-      border: 1px solid rgba(217, 227, 231, 0.9);
-      box-shadow: var(--shadow);
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(216, 226, 234, 0.9);
       border-radius: 24px;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
     }
 
-    .card-header {
-      padding: 22px 22px 10px;
+    .input-card, .result-card, .notes-card {
+      padding: 24px;
     }
 
-    .card-header h2 {
-      margin: 0 0 6px;
-      font-size: 1.15rem;
-      letter-spacing: -0.02em;
+    h2 {
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      margin: 0 0 18px;
     }
 
-    .card-header p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.93rem;
-      line-height: 1.45;
-    }
-
-    form {
-      padding: 16px 22px 22px;
-      display: grid;
-      gap: 14px;
+    .field {
+      margin-bottom: 18px;
     }
 
     label {
-      display: grid;
-      gap: 6px;
-      font-weight: 750;
-      font-size: 0.92rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
     }
 
-    .hint {
-      font-weight: 500;
+    label span {
       color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.35;
+      font-weight: 600;
     }
 
-    input, select {
+    input {
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 14px;
-      padding: 12px 13px;
+      padding: 13px 14px;
       font: inherit;
       color: var(--ink);
-      background: #fff;
+      background: #fbfdfe;
       outline: none;
-      transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    input:focus, select:focus {
+    input:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(42, 157, 143, 0.14);
+      box-shadow: 0 0 0 4px rgba(37, 109, 133, 0.12);
     }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+    .hint {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+      margin-top: 7px;
     }
 
-    button {
-      border: 0;
-      border-radius: 16px;
-      padding: 13px 16px;
-      font: inherit;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
-    }
-
-    button:hover { transform: translateY(-1px); }
-    button:active { transform: translateY(0); }
-
-    .primary {
-      background: var(--ink);
-      color: #fff;
-      box-shadow: 0 12px 26px rgba(20, 33, 61, 0.18);
-    }
-
-    .secondary {
-      background: var(--soft);
-      color: var(--ink);
-      border: 1px solid var(--line);
-    }
-
-    .button-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 4px;
-    }
-
-    .results {
-      padding: 22px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .hero-result {
-      padding: 22px;
+    .result-hero {
+      background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+      color: white;
+      padding: 30px;
       border-radius: 22px;
-      background: linear-gradient(135deg, rgba(42, 157, 143, 0.14), rgba(42, 157, 143, 0.04));
-      border: 1px solid rgba(42, 157, 143, 0.18);
+      margin-bottom: 16px;
     }
 
-    .hero-result .label {
-      color: #11665c;
-      font-weight: 800;
-      font-size: 0.82rem;
+    .result-label {
+      font-size: 0.8rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .hero-result .value {
-      margin-top: 5px;
-      font-size: clamp(2.3rem, 6vw, 4.4rem);
-      font-weight: 900;
-      letter-spacing: -0.07em;
-      line-height: 0.95;
-    }
-
-    .hero-result .unit {
-      color: var(--muted);
-      font-weight: 750;
-      font-size: 1rem;
-    }
-
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .metric {
-      padding: 16px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--soft);
-      min-height: 94px;
-    }
-
-    .metric .name {
-      color: var(--muted);
-      font-size: 0.82rem;
+      letter-spacing: 0.13em;
+      opacity: 0.82;
       font-weight: 700;
-      margin-bottom: 7px;
+      margin-bottom: 8px;
     }
 
-    .metric .number {
-      font-size: 1.38rem;
-      font-weight: 900;
+    .drop-value {
+      font-size: clamp(3.8rem, 10vw, 7rem);
+      line-height: 0.92;
+      letter-spacing: -0.07em;
+      font-weight: 850;
+    }
+
+    .drop-unit {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 750;
+      opacity: 0.9;
+      margin-left: 8px;
       letter-spacing: -0.03em;
     }
 
-    .metric .sub {
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .mini {
+      background: var(--soft);
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 92px;
+    }
+
+    .mini .name {
       color: var(--muted);
       font-size: 0.78rem;
-      margin-top: 3px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
     }
 
-    .notice {
-      padding: 14px 16px;
+    .mini .value {
+      font-size: 1.35rem;
+      font-weight: 850;
+      letter-spacing: -0.04em;
+    }
+
+    .warning {
+      display: none;
+      border: 1px solid #f4d49b;
+      background: var(--warning-bg);
+      color: var(--warning);
       border-radius: 16px;
-      font-size: 0.9rem;
-      line-height: 1.45;
-    }
-
-    .notice.warning {
-      background: var(--warning);
-      border: 1px solid var(--warning-line);
-    }
-
-    .notice.error {
-      background: var(--error);
-      border: 1px solid var(--error-line);
-    }
-
-    .equation {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.8rem;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      background: #101828;
-      color: #eef6f7;
-      border-radius: 18px;
-      padding: 15px;
+      padding: 12px 14px;
+      font-size: 0.92rem;
+      line-height: 1.4;
+      margin-bottom: 16px;
     }
 
     details {
-      padding: 0 22px 22px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: #fbfdfe;
     }
 
     summary {
       cursor: pointer;
-      font-weight: 850;
-      margin-bottom: 12px;
+      font-weight: 800;
+      color: var(--accent-dark);
     }
 
-    .small {
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px 18px;
+      margin-top: 16px;
+      font-size: 0.92rem;
+    }
+
+    .details-grid div {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 9px;
+    }
+
+    .details-grid b {
+      display: block;
       color: var(--muted);
-      font-size: 0.84rem;
-      line-height: 1.5;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .notes-card {
+      margin-top: 22px;
+      box-shadow: none;
+      background: rgba(255,255,255,0.7);
+    }
+
+    .notes-card p {
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0 0 12px;
     }
 
     footer {
-      margin-top: 24px;
       color: var(--muted);
-      font-size: 0.85rem;
-      line-height: 1.5;
+      border-top: 1px solid var(--line);
+      margin-top: 28px;
+      padding-top: 18px;
+      font-size: 0.92rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
-    @media (max-width: 850px) {
-      body { padding: 18px; }
+    footer strong { color: var(--ink); }
+
+    @media (max-width: 860px) {
       main { grid-template-columns: 1fr; }
-      .grid-2, .button-row, .metrics { grid-template-columns: 1fr; }
-    }
-
-    @media print {
-      body { background: #fff; padding: 0; }
-      .card { box-shadow: none; }
-      button, footer { display: none; }
-      main { grid-template-columns: 1fr 1fr; }
+      .result-grid { grid-template-columns: 1fr; }
+      .details-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="page">
     <header>
-      <div class="eyebrow">Universal sorter tool · no presets · no nonsense</div>
-      <h1>Drop Volume Calculator</h1>
-      <p class="lead">Estimate sheath flow rate, droplet volume, maximum sorted events for a target collection volume, and expected collection volume for a requested number of sorted events.</p>
+      <p class="eyebrow">Flow Cytometry Tools</p>
+      <h1>Universal Drop Volume Calculator</h1>
+      <p class="subtitle">Estimate droplet volume, flow rate, maximum theoretical events in a collection volume, and expected sort volume for jet-in-air cell sorting.</p>
     </header>
 
     <main>
-      <section class="card" aria-labelledby="input-title">
-        <div class="card-header">
-          <h2 id="input-title">Sort settings</h2>
-          <p>Enter the settings from any droplet sorter. The calculator intentionally avoids sorter presets so the assumptions remain visible.</p>
+      <section class="card input-card" aria-label="Calculator inputs">
+        <h2>Sort settings</h2>
+
+        <div class="field">
+          <label for="pressure">Pressure <span>PSI</span></label>
+          <input type="number" id="pressure" min="0" step="0.1" value="70" inputmode="decimal" />
         </div>
 
-        <form id="calculator-form">
-          <div class="grid-2">
-            <label>
-              Pressure
-              <input id="pressure" type="number" inputmode="decimal" min="0" step="0.01" value="20" required />
-              <span class="hint">PSI, as entered on the sorter.</span>
-            </label>
+        <div class="field">
+          <label for="diameter">Nozzle diameter <span>µm</span></label>
+          <input type="number" id="diameter" min="1" step="1" value="70" inputmode="decimal" />
+        </div>
 
-            <label>
-              Nozzle diameter
-              <input id="diameter" type="number" inputmode="decimal" min="1" step="1" value="100" required />
-              <span class="hint">µm.</span>
-            </label>
-          </div>
+        <div class="field">
+          <label for="frequency">Drop drive frequency <span>kHz</span></label>
+          <input type="number" id="frequency" min="0" step="0.1" value="90" inputmode="decimal" />
+          <div class="hint">Enter the frequency as shown on the sorter, typically in kHz.</div>
+        </div>
 
-          <div class="grid-2">
-            <label>
-              Drop drive frequency
-              <input id="frequency" type="number" inputmode="decimal" min="0.001" step="0.001" value="28" required />
-              <span class="hint">kHz. For example, enter 28 for 28 kHz.</span>
-            </label>
+        <div class="field">
+          <label for="maxVolume">Maximum collection volume <span>µL</span></label>
+          <input type="number" id="maxVolume" min="0" step="1" value="250" inputmode="decimal" />
+        </div>
 
-            <label>
-              Pressure mode
-              <select id="pressureMode">
-                <option value="gauge" selected>Gauge PSI, typical sorter display</option>
-                <option value="absolute">Absolute PSI</option>
-              </select>
-              <span class="hint">Most instruments display gauge pressure.</span>
-            </label>
-          </div>
-
-          <div class="grid-2">
-            <label>
-              Maximum collection volume
-              <input id="maxVolume" type="number" inputmode="decimal" min="0" step="0.01" value="250" />
-              <span class="hint">µL. Used to estimate maximum sorted events.</span>
-            </label>
-
-            <label>
-              Sorted events requested
-              <input id="numOfCells" type="number" inputmode="numeric" min="0" step="1" value="100000" />
-              <span class="hint">Used to estimate final collection volume.</span>
-            </label>
-          </div>
-
-          <div class="button-row">
-            <button class="primary" type="submit">Calculate</button>
-            <button class="secondary" type="button" id="copyButton">Copy results</button>
-          </div>
-        </form>
+        <div class="field">
+          <label for="numOfCells">Target sorted events <span>events</span></label>
+          <input type="number" id="numOfCells" min="0" step="1" value="50000" inputmode="numeric" />
+        </div>
       </section>
 
-      <section class="card" aria-labelledby="results-title">
-        <div class="card-header">
-          <h2 id="results-title">Results</h2>
-          <p>Calculated live from the entered pressure, nozzle diameter and drop frequency.</p>
+      <section class="card result-card" aria-label="Calculator results">
+        <div class="warning" id="warning"></div>
+
+        <div class="result-hero">
+          <div class="result-label">Drop volume</div>
+          <span class="drop-value" id="dropVolume">—</span><span class="drop-unit">nL/drop</span>
         </div>
 
-        <div class="results" id="results">
-          <div class="hero-result">
-            <div class="label">Drop volume</div>
-            <div class="value"><span id="dropVolume">—</span> <span class="unit">nL/drop</span></div>
+        <div class="result-grid">
+          <div class="mini">
+            <div class="name">Flow rate</div>
+            <div class="value" id="flowRate">—</div>
           </div>
-
-          <div id="messageBox" class="notice warning" hidden></div>
-
-          <div class="metrics">
-            <div class="metric">
-              <div class="name">Sheath flow rate</div>
-              <div class="number" id="flowRate">—</div>
-              <div class="sub">µL/s</div>
-            </div>
-            <div class="metric">
-              <div class="name">Maximum sorted events</div>
-              <div class="number" id="maxEvents">—</div>
-              <div class="sub">within target volume</div>
-            </div>
-            <div class="metric">
-              <div class="name">Estimated sort volume</div>
-              <div class="number" id="sortVolume">—</div>
-              <div class="sub">µL for requested events</div>
-            </div>
-            <div class="metric">
-              <div class="name">Jet velocity</div>
-              <div class="number" id="velocity">—</div>
-              <div class="sub">m/s</div>
-            </div>
+          <div class="mini">
+            <div class="name">Maximum events</div>
+            <div class="value" id="maxEvents">—</div>
           </div>
-
-          <div class="equation" id="calculationDetails">Enter values and calculate.</div>
+          <div class="mini">
+            <div class="name">Sort volume</div>
+            <div class="value" id="sortVolume">—</div>
+          </div>
         </div>
 
         <details>
-          <summary>Assumptions and caveats</summary>
-          <div class="small">
-            This is a theoretical calculator based on nozzle diameter, pressure, liquid density, atmospheric pressure, and an empirical correction factor. It is intended for planning and comparison, not as a substitute for experimental validation. Actual collected volume can vary with instrument condition, sheath composition, temperature, stability of the stream, satellite droplets, sort mode, aborts, and collection geometry. Frequency is treated as kHz.
+          <summary>Show calculation details</summary>
+          <div class="details-grid">
+            <div><b>Effective pressure</b><span id="effectivePressure">—</span></div>
+            <div><b>Nozzle area</b><span id="area">—</span></div>
+            <div><b>Velocity</b><span id="velocity">—</span></div>
+            <div><b>Correction factor</b><span id="correction">—</span></div>
+            <div><b>Equation branch</b><span id="branch">—</span></div>
+            <div><b>Frequency</b><span id="frequencyDetail">—</span></div>
           </div>
         </details>
       </section>
     </main>
 
+    <section class="card notes-card">
+      <h2>Assumptions</h2>
+      <p>This calculator provides a theoretical estimate for jet-in-air cell sorters using sheath pressure, nozzle diameter, drop drive frequency, and empirical correction factors. Results should be interpreted as estimates and validated experimentally for critical applications.</p>
+      <p>The tool is intentionally universal: it does not rely on sorter-specific presets.</p>
+    </section>
+
     <footer>
-      Universal Drop Volume Calculator for Cell Sorters. Keep this file as <strong>index.html</strong> when hosting on GitHub Pages, Cloudflare Pages, Netlify, or similar static hosting.
+      <div><strong>Universal Drop Volume Calculator</strong> · Version 1.0</div>
+      <div>Created by <strong>Ana Agua-Doce</strong></div>
     </footer>
   </div>
 
   <script>
-    const DENSITY_LIQUID = 1005; // kg/m^3, approximate sheath density
-    const ATMOSPHERIC_PRESSURE_PSI = 14.75;
+    const densityLiquid = 1005; // kg/m^3
+    const standardPressure = 101325; // Pa
     const PSI_TO_PA = 6894.76;
 
-    const els = {
-      form: document.getElementById('calculator-form'),
-      pressure: document.getElementById('pressure'),
-      pressureMode: document.getElementById('pressureMode'),
-      diameter: document.getElementById('diameter'),
-      frequency: document.getElementById('frequency'),
-      maxVolume: document.getElementById('maxVolume'),
-      numOfCells: document.getElementById('numOfCells'),
-      dropVolume: document.getElementById('dropVolume'),
-      flowRate: document.getElementById('flowRate'),
-      maxEvents: document.getElementById('maxEvents'),
-      sortVolume: document.getElementById('sortVolume'),
-      velocity: document.getElementById('velocity'),
-      details: document.getElementById('calculationDetails'),
-      messageBox: document.getElementById('messageBox'),
-      copyButton: document.getElementById('copyButton')
+    const ids = ["pressure", "diameter", "frequency", "maxVolume", "numOfCells"];
+    const el = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+
+    const output = {
+      warning: document.getElementById("warning"),
+      dropVolume: document.getElementById("dropVolume"),
+      flowRate: document.getElementById("flowRate"),
+      maxEvents: document.getElementById("maxEvents"),
+      sortVolume: document.getElementById("sortVolume"),
+      effectivePressure: document.getElementById("effectivePressure"),
+      area: document.getElementById("area"),
+      velocity: document.getElementById("velocity"),
+      correction: document.getElementById("correction"),
+      branch: document.getElementById("branch"),
+      frequencyDetail: document.getElementById("frequencyDetail")
     };
 
-    function numberValue(element) {
-      const value = Number.parseFloat(element.value);
-      return Number.isFinite(value) ? value : null;
+    function fmt(value, digits = 2) {
+      return Number.isFinite(value) ? value.toLocaleString(undefined, { maximumFractionDigits: digits }) : "—";
     }
 
-    function format(value, digits = 2) {
-      if (!Number.isFinite(value)) return '—';
-      return value.toLocaleString(undefined, { maximumFractionDigits: digits, minimumFractionDigits: digits });
-    }
-
-    function formatFlexible(value) {
-      if (!Number.isFinite(value)) return '—';
-      if (Math.abs(value) >= 1000) return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
-      if (Math.abs(value) >= 100) return value.toLocaleString(undefined, { maximumFractionDigits: 1 });
-      return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    }
-
-    function correctionFactor(absolutePressurePsi) {
-      if (absolutePressurePsi < 15) {
-        return {
-          name: 'z',
-          value: -0.0124 * absolutePressurePsi + 1.6126,
-          equation: 'z = -0.0124P + 1.6126'
-        };
-      }
-      return {
-        name: 'y',
-        value: -1.33845e-5 * Math.pow(absolutePressurePsi, 3) +
-               0.002174 * Math.pow(absolutePressurePsi, 2) -
-               0.11725 * absolutePressurePsi + 3.067305,
-        equation: 'y = -1.33845e-5P³ + 0.002174P² - 0.11725P + 3.067305'
-      };
-    }
-
-    function calculate() {
-      const pressureInputPsi = numberValue(els.pressure);
-      const diameterMicrometers = numberValue(els.diameter);
-      const frequencyKHz = numberValue(els.frequency);
-      const maxVolumeMicroLiters = numberValue(els.maxVolume) ?? 0;
-      const numOfCellsSorted = numberValue(els.numOfCells) ?? 0;
-      const pressureMode = els.pressureMode.value;
-
-      const warnings = [];
-      const errors = [];
-
-      if (pressureInputPsi === null || pressureInputPsi < 0) errors.push('Pressure must be zero or higher.');
-      if (diameterMicrometers === null || diameterMicrometers <= 0) errors.push('Nozzle diameter must be higher than zero.');
-      if (frequencyKHz === null || frequencyKHz <= 0) errors.push('Frequency must be higher than zero.');
-      if (maxVolumeMicroLiters < 0) errors.push('Maximum collection volume cannot be negative.');
-      if (numOfCellsSorted < 0) errors.push('Sorted events cannot be negative.');
-
-      if (errors.length) {
-        showMessage(errors.join(' '), true);
-        clearResults();
-        return null;
-      }
-
-      const absolutePressurePsi = pressureMode === 'gauge'
-        ? pressureInputPsi + ATMOSPHERIC_PRESSURE_PSI
-        : pressureInputPsi;
-
-      if (pressureMode === 'absolute' && pressureInputPsi < ATMOSPHERIC_PRESSURE_PSI) {
-        warnings.push('Absolute pressure is below atmospheric pressure; velocity cannot be calculated physically.');
-      }
-
-      if (pressureMode === 'gauge' && pressureInputPsi < 1) {
-        warnings.push('Very low gauge pressure entered. Check whether this is intended.');
-      }
-
-      const drivingPressurePa = pressureMode === 'gauge'
-        ? pressureInputPsi * PSI_TO_PA
-        : (absolutePressurePsi - ATMOSPHERIC_PRESSURE_PSI) * PSI_TO_PA;
-
-      if (drivingPressurePa <= 0) {
-        showMessage('Driving pressure must be above zero. Check pressure value and pressure mode.', true);
-        clearResults();
-        return null;
-      }
-
-      const diameterMeters = diameterMicrometers * 1e-6;
-      const area = Math.PI * Math.pow(diameterMeters / 2, 2);
-      const velocity = Math.sqrt((2 * drivingPressurePa) / DENSITY_LIQUID);
-      const correction = correctionFactor(absolutePressurePsi);
-      const flowRateMicroLitersPerSecond = area * velocity * correction.value * 1e9; // m^3/s to µL/s
-      const dropVolumeNanoLiters = flowRateMicroLitersPerSecond / frequencyKHz; // µL/s divided by kHz = nL/drop
-      const maxEvents = maxVolumeMicroLiters > 0 ? (maxVolumeMicroLiters * 1000) / dropVolumeNanoLiters : NaN;
-      const volumeOfSortMicroLiters = numOfCellsSorted > 0 ? (numOfCellsSorted * dropVolumeNanoLiters) / 1000 : NaN;
-
-      if (correction.value <= 0) {
-        warnings.push('The empirical correction factor is zero or negative at this pressure. Treat this result as outside the validated/useful range.');
-      }
-
-      if (dropVolumeNanoLiters <= 0 || !Number.isFinite(dropVolumeNanoLiters)) {
-        showMessage('Calculation produced an invalid drop volume. Check whether the pressure is outside the useful range of the empirical correction.', true);
-        clearResults();
-        return null;
-      }
-
-      els.dropVolume.textContent = format(dropVolumeNanoLiters, 2);
-      els.flowRate.textContent = format(flowRateMicroLitersPerSecond, 2);
-      els.maxEvents.textContent = Number.isFinite(maxEvents) ? formatFlexible(maxEvents) : '—';
-      els.sortVolume.textContent = Number.isFinite(volumeOfSortMicroLiters) ? format(volumeOfSortMicroLiters, 2) : '—';
-      els.velocity.textContent = format(velocity, 2);
-
-      els.details.textContent = [
-        `Pressure input: ${format(pressureInputPsi, 2)} PSI (${pressureMode})`,
-        `Absolute pressure used for correction: ${format(absolutePressurePsi, 2)} PSI`,
-        `Driving pressure: ${format(drivingPressurePa, 2)} Pa`,
-        `Nozzle area: ${area.toExponential(6)} m²`,
-        `Velocity: ${format(velocity, 4)} m/s`,
-        `Correction: ${correction.name} = ${format(correction.value, 6)} using ${correction.equation}`,
-        `Flow rate: ${format(flowRateMicroLitersPerSecond, 4)} µL/s`,
-        `Drop volume: flow rate / frequency = ${format(dropVolumeNanoLiters, 4)} nL/drop`
-      ].join('\n');
-
-      if (warnings.length) showMessage(warnings.join(' '), false);
-      else hideMessage();
-
-      return {
-        pressureInputPsi,
-        pressureMode,
-        absolutePressurePsi,
-        diameterMicrometers,
-        frequencyKHz,
-        flowRateMicroLitersPerSecond,
-        dropVolumeNanoLiters,
-        maxEvents,
-        volumeOfSortMicroLiters,
-        velocity,
-        correction
-      };
-    }
-
-    function showMessage(message, isError) {
-      els.messageBox.hidden = false;
-      els.messageBox.textContent = message;
-      els.messageBox.className = isError ? 'notice error' : 'notice warning';
-    }
-
-    function hideMessage() {
-      els.messageBox.hidden = true;
-      els.messageBox.textContent = '';
+    function showWarning(message) {
+      output.warning.style.display = message ? "block" : "none";
+      output.warning.textContent = message || "";
     }
 
     function clearResults() {
-      els.dropVolume.textContent = '—';
-      els.flowRate.textContent = '—';
-      els.maxEvents.textContent = '—';
-      els.sortVolume.textContent = '—';
-      els.velocity.textContent = '—';
-      els.details.textContent = 'Enter values and calculate.';
+      ["dropVolume", "flowRate", "maxEvents", "sortVolume", "effectivePressure", "area", "velocity", "correction", "branch", "frequencyDetail"].forEach(id => {
+        output[id].textContent = "—";
+      });
     }
 
-    async function copyResults() {
-      const result = calculate();
-      if (!result) return;
+    function calculate() {
+      const pressureInputPSI = parseFloat(el.pressure.value);
+      const diameterMicrometers = parseFloat(el.diameter.value);
+      const frequencyKHz = parseFloat(el.frequency.value);
+      const maxVolumeMicroLiters = parseFloat(el.maxVolume.value);
+      const numOfCellsSorted = parseFloat(el.numOfCells.value);
 
-      const text = [
-        'Universal Drop Volume Calculator for Cell Sorters',
-        `Pressure: ${format(result.pressureInputPsi, 2)} PSI (${result.pressureMode})`,
-        `Nozzle diameter: ${format(result.diameterMicrometers, 0)} µm`,
-        `Frequency: ${format(result.frequencyKHz, 3)} kHz`,
-        `Flow rate: ${format(result.flowRateMicroLitersPerSecond, 2)} µL/s`,
-        `Drop volume: ${format(result.dropVolumeNanoLiters, 2)} nL/drop`,
-        `Maximum events: ${Number.isFinite(result.maxEvents) ? formatFlexible(result.maxEvents) : 'not calculated'}`,
-        `Estimated sort volume: ${Number.isFinite(result.volumeOfSortMicroLiters) ? format(result.volumeOfSortMicroLiters, 2) + ' µL' : 'not calculated'}`
-      ].join('\n');
-
-      try {
-        await navigator.clipboard.writeText(text);
-        showMessage('Results copied to clipboard.', false);
-      } catch (error) {
-        showMessage('Could not copy automatically. Select the calculation details and copy manually.', false);
+      if ([pressureInputPSI, diameterMicrometers, frequencyKHz, maxVolumeMicroLiters, numOfCellsSorted].some(v => !Number.isFinite(v))) {
+        clearResults();
+        showWarning("Please enter values in all fields.");
+        return;
       }
+
+      if (pressureInputPSI <= 0 || diameterMicrometers <= 0 || frequencyKHz <= 0 || maxVolumeMicroLiters < 0 || numOfCellsSorted < 0) {
+        clearResults();
+        showWarning("Pressure, nozzle diameter, and frequency must be greater than zero. Volumes and event numbers cannot be negative.");
+        return;
+      }
+
+      showWarning("");
+
+      // Original model behaviour: pressures below 15 PSI are adjusted by atmospheric pressure.
+      const isLowPressureInput = pressureInputPSI < 15;
+      const effectivePressurePSI = isLowPressureInput ? pressureInputPSI + 14.75 : pressureInputPSI;
+      const pressurePa = effectivePressurePSI * PSI_TO_PA;
+      const diameterMeters = diameterMicrometers * 1e-6;
+      const area = Math.PI * Math.pow(diameterMeters / 2, 2);
+      const velocity = Math.sqrt(Math.max(0, (2 * (pressurePa - standardPressure)) / densityLiquid));
+
+      let correctionFactor;
+      let branch;
+
+      if (isLowPressureInput) {
+        correctionFactor = -0.0124 * effectivePressurePSI + 1.6126;
+        branch = "Low-pressure correction";
+      } else {
+        correctionFactor = -1.33845e-5 * Math.pow(effectivePressurePSI, 3)
+          + 0.002174 * Math.pow(effectivePressurePSI, 2)
+          - 0.11725 * effectivePressurePSI
+          + 3.067305;
+        branch = "Standard pressure correction";
+      }
+
+      const flowRateMicroLitersPerSecond = area * velocity * correctionFactor * 1e6;
+      const dropVolumeNanoLiters = flowRateMicroLitersPerSecond / frequencyKHz * 1000;
+      const maxEvents = (maxVolumeMicroLiters * 1000) / dropVolumeNanoLiters;
+      const volumeOfSortMicroLiters = numOfCellsSorted * dropVolumeNanoLiters / 1000;
+
+      output.dropVolume.textContent = fmt(dropVolumeNanoLiters, 2);
+      output.flowRate.textContent = `${fmt(flowRateMicroLitersPerSecond, 2)} µL/s`;
+      output.maxEvents.textContent = fmt(maxEvents, 0);
+      output.sortVolume.textContent = `${fmt(volumeOfSortMicroLiters, 2)} µL`;
+      output.effectivePressure.textContent = `${fmt(effectivePressurePSI, 2)} PSI`;
+      output.area.textContent = `${area.toExponential(4)} m²`;
+      output.velocity.textContent = `${fmt(velocity, 2)} m/s`;
+      output.correction.textContent = fmt(correctionFactor, 6);
+      output.branch.textContent = branch;
+      output.frequencyDetail.textContent = `${fmt(frequencyKHz, 2)} kHz`;
     }
 
-    els.form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      calculate();
-    });
-
-    document.querySelectorAll('input, select').forEach((element) => {
-      element.addEventListener('input', calculate);
-      element.addEventListener('change', calculate);
-    });
-
-    els.copyButton.addEventListener('click', copyResults);
-
+    ids.forEach(id => el[id].addEventListener("input", calculate));
     calculate();
   </script>
 </body>
